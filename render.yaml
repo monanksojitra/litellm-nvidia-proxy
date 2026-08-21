@@ -1,0 +1,29 @@
+# Render Blueprint for LiteLLM NVIDIA Proxy
+# This file defines the service configuration for Render
+# Secrets (NVIDIA_API_KEY, LITELLM_MASTER_KEY) must be added manually in Render dashboard
+# DO NOT commit actual secret values to this file
+
+services:
+  - type: web
+    name: litellm-nvidia-proxy
+    runtime: docker
+    plan: free
+    region: oregon  # or your preferred region
+    dockerfilePath: ./Dockerfile
+    # Health check endpoint (no auth required)
+    healthCheckPath: /health/liveliness
+    # Port - Render injects PORT env var, Dockerfile uses ${PORT:-4000}
+    # No need to specify port explicitly for Docker services
+    envVars:
+      # These must be set in Render Dashboard -> Environment
+      # NVIDIA_API_KEY: your-nvidia-api-key-from-build.nvidia.com
+      # LITELLM_MASTER_KEY: sk-your-generated-master-key
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: LITELLM_TELEMETRY
+        value: "false"
+    # Free tier limitations:
+    # - Spins down after 15 minutes of inactivity (cold start ~30-60s)
+    # - 512 MB RAM, 0.5 CPU
+    # - No persistent disks, no background workers
+    # - 750 hours/month free

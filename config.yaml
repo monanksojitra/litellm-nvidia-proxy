@@ -1,0 +1,69 @@
+# LiteLLM Proxy Configuration for NVIDIA API
+# NVIDIA_API_KEY and LITELLM_MASTER_KEY must be set as environment variables
+# NEVER commit actual keys to this file or version control
+
+model_list:
+  - model_name: nvidia-coding
+    litellm_params:
+      # Use NVIDIA's Nemotron 3 Ultra (best for coding/reasoning) or Nemotron 3 Super
+      # Model format: nvidia_nim/<model-id>
+      # Available models can be listed at: https://build.nvidia.com/explore/discover
+      model: nvidia_nim/nvidia/llama-3.3-nemotron-super-49b-v1.5
+      # NVIDIA OpenAI-compatible endpoint
+      api_base: https://integrate.api.nvidia.com/v1
+      # API key read from environment variable
+      api_key: os.environ/NVIDIA_API_KEY
+      # Request timeout
+      request_timeout: 120
+      # Max retries for transient failures
+      num_retries: 2
+      # Optional: rate limits per model (adjust based on your NVIDIA quota)
+      rpm: 60
+      tpm: 100000
+
+general_settings:
+  # Master key for proxy authentication - MUST be set via LITELLM_MASTER_KEY env var
+  # Must start with "sk-" prefix
+  master_key: os.environ/LITELLM_MASTER_KEY
+
+  # Only allow authenticated requests to completion endpoints
+  # Health endpoints /health/liveliness and /health/readiness remain public
+  public_routes:
+    - "/health/liveliness"
+    - "/health/readiness"
+
+  # Enable background health checks (requires database, so disabled for stateless Free tier)
+  background_health_checks: false
+
+  # Token rate limit type: "total" (default), "input", or "output"
+  token_rate_limit_type: "total"
+
+  # Optional: Custom header name for master key (default: Authorization)
+  # litellm_key_header_name: "X-Litellm-Key"
+
+  # Disable storing keys in memory as plaintext (requires LITELLM_SALT_KEY)
+  # Not using for Free tier stateless deployment
+  # encrypt_credentials: true
+
+router_settings:
+  # Enforce model-level rate limits
+  optional_pre_call_checks:
+    - enforce_model_rate_limits
+
+  # Retry policy for upstream failures
+  retry_policy:
+    max_retries: 2
+    retry_on_status_codes:
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+
+litellm_settings:
+  # Drop unsupported parameters rather than erroring
+  drop_params: true
+  # Set request timeout
+  request_timeout: 120
+  # Telemetry (disabled for privacy)
+  telemetry: false

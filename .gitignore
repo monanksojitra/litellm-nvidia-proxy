@@ -1,0 +1,33 @@
+# Environment files with secrets - NEVER COMMIT
+.env
+.env.local
+.env.*.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+
+# Docker
+.docker/
+
+# Temporary files
+*.tmp
+*.temp
