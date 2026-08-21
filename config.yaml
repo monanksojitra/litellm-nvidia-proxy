@@ -8,7 +8,7 @@ model_list:
       # Use NVIDIA's Nemotron 3 Ultra (best for coding/reasoning) or Nemotron 3 Super
       # Model format: nvidia_nim/<model-id>
       # Available models can be listed at: https://build.nvidia.com/explore/discover
-      model: nvidia_nim/deepseek-ai/deepseek-v4-pro
+      model: nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b
       # NVIDIA OpenAI-compatible endpoint
       api_base: https://integrate.api.nvidia.com/v1
       # API key read from environment variable
