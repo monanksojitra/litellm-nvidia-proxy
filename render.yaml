@@ -1,11 +1,11 @@
-# Render Blueprint for LiteLLM NVIDIA Proxy
+# Render Blueprint for LiteLLM Multi-Provider Free Proxy
 # This file defines the service configuration for Render
-# Secrets (NVIDIA_API_KEY, LITELLM_MASTER_KEY) must be added manually in Render dashboard
+# Secrets must be added manually in Render dashboard
 # DO NOT commit actual secret values to this file
 
 services:
   - type: web
-    name: litellm-nvidia-proxy
+    name: litellm-free-proxy
     runtime: docker
     plan: free
     region: oregon  # or your preferred region
@@ -13,15 +13,29 @@ services:
     # Health check endpoint (no auth required)
     healthCheckPath: /health/liveliness
     # Port - Render injects PORT env var, Dockerfile uses ${PORT:-4000}
-    # No need to specify port explicitly for Docker services
     envVars:
-      # These must be set in Render Dashboard -> Environment
-      # NVIDIA_API_KEY: your-nvidia-api-key-from-build.nvidia.com
-      # LITELLM_MASTER_KEY: sk-your-generated-master-key
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: LITELLM_TELEMETRY
         value: "false"
+      # Supported Provider Keys (Add desired ones in Render Dashboard -> Environment):
+      # - LITELLM_MASTER_KEY: sk-your-generated-master-key (Required)
+      # - GEMINI_API_KEY: AIzaSy... (Google AI Studio)
+      # - GROQ_API_KEY: gsk_... (Groq)
+      # - SAMBANOVA_API_KEY: ... (SambaNova Cloud)
+      # - CEREBRAS_API_KEY: csk-... (Cerebras)
+      # - GITHUB_API_KEY: ghp_... (GitHub Personal Access Token)
+      # - SILICONFLOW_API_KEY: sk-... (SiliconFlow Cloud)
+      # - CLOUDFLARE_API_KEY: ... + CLOUDFLARE_ACCOUNT_ID: ... (Cloudflare Workers AI)
+      # - HF_TOKEN: hf_... (Hugging Face Serverless)
+      # - COHERE_API_KEY: ... (Cohere Developer Trial)
+      # - OPENROUTER_API_KEY: sk-or-... (OpenRouter Free)
+      # - MISTRAL_API_KEY: ... (Mistral AI)
+      # - TOGETHERAI_API_KEY: ... (Together AI)
+      # - DEEPINFRA_API_KEY: ... (DeepInfra)
+      # - NEBIUS_API_KEY: ... (Nebius AI Studio)
+      # - FIREWORKS_AI_API_KEY: ... (Fireworks AI)
+      # - NVIDIA_API_KEY: nvapi-... (NVIDIA NIM)
     # Free tier limitations:
     # - Spins down after 15 minutes of inactivity (cold start ~30-60s)
     # - 512 MB RAM, 0.5 CPU

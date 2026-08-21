@@ -1,56 +1,363 @@
-# LiteLLM Proxy Configuration for NVIDIA API
-# NVIDIA_API_KEY and LITELLM_MASTER_KEY must be set as environment variables
-# NEVER commit actual keys to this file or version control
+# LiteLLM Proxy Configuration for Multi-Provider Free LLMs
+# Supports Single-Agent and Multi-Agent Parallel Coding Workflows
+# All API keys must be provided via environment variables.
+# NEVER commit actual secrets or keys to this repository.
 
 model_list:
-  - model_name: nvidia-coding
+  # ============================================================================
+  # 1. MULTI-AGENT ROLE POOLS & GENERAL CODING POOLS
+  # ============================================================================
+
+  # --- POOL A: agent-coder / free-coding (Primary Pool for Code Generation & Tool Calls) ---
+  - model_name: free-coding
     litellm_params:
-      # Use NVIDIA's Nemotron 3 Ultra (best for coding/reasoning) or Nemotron 3 Super
-      # Model format: nvidia_nim/<model-id>
-      # Available models can be listed at: https://build.nvidia.com/explore/discover
-      model: nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b
-      # NVIDIA OpenAI-compatible endpoint
-      api_base: https://integrate.api.nvidia.com/v1
-      # API key read from environment variable
-      api_key: os.environ/NVIDIA_API_KEY
-      # Request timeout
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+      rpm: 15
+      tpm: 1000000
       request_timeout: 120
-      # Max retries for transient failures
-      num_retries: 2
-      # Optional: rate limits per model (adjust based on your NVIDIA quota)
+
+  - model_name: free-coding
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      tpm: 30000
+      request_timeout: 90
+
+  - model_name: free-coding
+    litellm_params:
+      model: sambanova/Meta-Llama-3.3-70B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+      rpm: 30
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: mistral/codestral-latest
+      api_key: os.environ/MISTRAL_API_KEY
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_base: https://api.siliconflow.cn/v1
+      api_key: os.environ/SILICONFLOW_API_KEY
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: github/meta/Llama-3.3-70B-Instruct
+      api_key: os.environ/GITHUB_API_KEY
+      rpm: 15
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: together_ai/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_key: os.environ/TOGETHERAI_API_KEY
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: deepinfra/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_key: os.environ/DEEPINFRA_API_KEY
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: cloudflare/@cf/qwen/qwen2.5-coder-32b-instruct
+      api_base: https://api.cloudflare.com/client/v4/accounts/os.environ/CLOUDFLARE_ACCOUNT_ID/ai/run/
+      api_key: os.environ/CLOUDFLARE_API_KEY
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: huggingface/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_key: os.environ/HF_TOKEN
+      request_timeout: 120
+
+  - model_name: free-coding
+    litellm_params:
+      model: nvidia_nim/nvidia/llama-3.3-nemotron-super-49b-v1.5
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
       rpm: 60
       tpm: 100000
+      request_timeout: 120
+
+  # --- POOL B: agent-planner / free-reasoning (Deep Architecture & Reasoning) ---
+  - model_name: free-reasoning
+    litellm_params:
+      model: sambanova/Meta-Llama-3.1-405B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+      rpm: 20
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: sambanova/DeepSeek-R1-Distill-Llama-70B
+      api_key: os.environ/SAMBANOVA_API_KEY
+      rpm: 20
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: gemini/gemini-2.0-flash-thinking-exp-01-21
+      api_key: os.environ/GEMINI_API_KEY
+      rpm: 10
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: github/o3-mini
+      api_key: os.environ/GITHUB_API_KEY
+      rpm: 15
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: openai/deepseek-ai/DeepSeek-R1
+      api_base: https://api.siliconflow.cn/v1
+      api_key: os.environ/SILICONFLOW_API_KEY
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: nebius/meta-llama/Meta-Llama-3.1-405B-Instruct
+      api_key: os.environ/NEBIUS_API_KEY
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: fireworks_ai/accounts/fireworks/models/deepseek-r1
+      api_key: os.environ/FIREWORKS_AI_API_KEY
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: cohere/command-r-plus
+      api_key: os.environ/COHERE_API_KEY
+      request_timeout: 180
+
+  - model_name: free-reasoning
+    litellm_params:
+      model: openrouter/deepseek/deepseek-r1:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 180
+
+  # --- POOL C: agent-reviewer / free-fast (High Throughput, Low Latency, Fast Auditing) ---
+  - model_name: free-fast
+    litellm_params:
+      model: cerebras/llama-3.3-70b
+      api_key: os.environ/CEREBRAS_API_KEY
+      rpm: 30
+      tpm: 60000
+      request_timeout: 60
+
+  - model_name: free-fast
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      tpm: 30000
+      request_timeout: 60
+
+  - model_name: free-fast
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: os.environ/GEMINI_API_KEY
+      rpm: 15
+      tpm: 1000000
+      request_timeout: 60
+
+  - model_name: free-fast
+    litellm_params:
+      model: cerebras/llama3.1-8b
+      api_key: os.environ/CEREBRAS_API_KEY
+      rpm: 30
+      request_timeout: 60
+
+  - model_name: free-fast
+    litellm_params:
+      model: cloudflare/@cf/meta/llama-3.3-70b-instruct
+      api_base: https://api.cloudflare.com/client/v4/accounts/os.environ/CLOUDFLARE_ACCOUNT_ID/ai/run/
+      api_key: os.environ/CLOUDFLARE_API_KEY
+      request_timeout: 60
+
+  - model_name: free-fast
+    litellm_params:
+      model: openai/meta-llama/Meta-Llama-3.1-8B-Instruct
+      api_base: https://api.siliconflow.cn/v1
+      api_key: os.environ/SILICONFLOW_API_KEY
+      request_timeout: 60
+
+  # --- POOL D: free-auto (OpenRouter Rotating Free Tier Pool) ---
+  - model_name: free-auto
+    litellm_params:
+      model: openrouter/openrouter/free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 120
+
+  - model_name: free-auto
+    litellm_params:
+      model: openrouter/meta-llama/llama-3.3-70b-instruct:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 120
+
+  - model_name: free-auto
+    litellm_params:
+      model: openrouter/qwen/qwen-2.5-coder-32b-instruct:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 120
+
+  # ============================================================================
+  # 2. DIRECT INDIVIDUAL MODEL TARGETS
+  # ============================================================================
+  # Google Gemini
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: gemini-2.0-flash
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+  # Groq
+  - model_name: groq-llama-70b
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+
+  - model_name: groq-qwen-coder
+    litellm_params:
+      model: groq/qwen-2.5-coder-32b
+      api_key: os.environ/GROQ_API_KEY
+
+  # SambaNova
+  - model_name: sambanova-llama-405b
+    litellm_params:
+      model: sambanova/Meta-Llama-3.1-405B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+
+  - model_name: sambanova-r1
+    litellm_params:
+      model: sambanova/DeepSeek-R1-Distill-Llama-70B
+      api_key: os.environ/SAMBANOVA_API_KEY
+
+  # Cerebras
+  - model_name: cerebras-llama-70b
+    litellm_params:
+      model: cerebras/llama-3.3-70b
+      api_key: os.environ/CEREBRAS_API_KEY
+
+  # GitHub Models
+  - model_name: github-gpt-4o
+    litellm_params:
+      model: github/gpt-4o
+      api_key: os.environ/GITHUB_API_KEY
+
+  - model_name: github-o3-mini
+    litellm_params:
+      model: github/o3-mini
+      api_key: os.environ/GITHUB_API_KEY
+
+  # SiliconFlow
+  - model_name: siliconflow-deepseek-r1
+    litellm_params:
+      model: openai/deepseek-ai/DeepSeek-R1
+      api_base: https://api.siliconflow.cn/v1
+      api_key: os.environ/SILICONFLOW_API_KEY
+
+  - model_name: siliconflow-qwen-coder
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_base: https://api.siliconflow.cn/v1
+      api_key: os.environ/SILICONFLOW_API_KEY
+
+  # Cloudflare Workers AI
+  - model_name: cloudflare-llama-70b
+    litellm_params:
+      model: cloudflare/@cf/meta/llama-3.3-70b-instruct
+      api_base: https://api.cloudflare.com/client/v4/accounts/os.environ/CLOUDFLARE_ACCOUNT_ID/ai/run/
+      api_key: os.environ/CLOUDFLARE_API_KEY
+
+  # Hugging Face
+  - model_name: hf-qwen-coder
+    litellm_params:
+      model: huggingface/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_key: os.environ/HF_TOKEN
+
+  # Cohere
+  - model_name: cohere-command-r-plus
+    litellm_params:
+      model: cohere/command-r-plus
+      api_key: os.environ/COHERE_API_KEY
+
+  # Together AI
+  - model_name: together-qwen-coder
+    litellm_params:
+      model: together_ai/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_key: os.environ/TOGETHERAI_API_KEY
+
+  # DeepInfra
+  - model_name: deepinfra-deepseek-r1
+    litellm_params:
+      model: deepinfra/deepseek-ai/DeepSeek-R1
+      api_key: os.environ/DEEPINFRA_API_KEY
+
+  # Nebius AI
+  - model_name: nebius-llama-405b
+    litellm_params:
+      model: nebius/meta-llama/Meta-Llama-3.1-405B-Instruct
+      api_key: os.environ/NEBIUS_API_KEY
+
+  # Fireworks AI
+  - model_name: fireworks-deepseek-r1
+    litellm_params:
+      model: fireworks_ai/accounts/fireworks/models/deepseek-r1
+      api_key: os.environ/FIREWORKS_AI_API_KEY
+
+  # Mistral
+  - model_name: mistral-codestral
+    litellm_params:
+      model: mistral/codestral-latest
+      api_key: os.environ/MISTRAL_API_KEY
+
+  # NVIDIA NIM (Backwards Compatibility)
+  - model_name: nvidia-coding
+    litellm_params:
+      model: nvidia_nim/nvidia/llama-3.3-nemotron-super-49b-v1.5
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
 
 general_settings:
   # Master key for proxy authentication - MUST be set via LITELLM_MASTER_KEY env var
-  # Must start with "sk-" prefix
   master_key: os.environ/LITELLM_MASTER_KEY
 
   # Only allow authenticated requests to completion endpoints
-  # Health endpoints /health/liveliness and /health/readiness remain public
   public_routes:
     - "/health/liveliness"
     - "/health/readiness"
 
-  # Enable background health checks (requires database, so disabled for stateless Free tier)
   background_health_checks: false
-
-  # Token rate limit type: "total" (default), "input", or "output"
   token_rate_limit_type: "total"
 
-  # Optional: Custom header name for master key (default: Authorization)
-  # litellm_key_header_name: "X-Litellm-Key"
-
-  # Disable storing keys in memory as plaintext (requires LITELLM_SALT_KEY)
-  # Not using for Free tier stateless deployment
-  # encrypt_credentials: true
-
 router_settings:
+  # Multi-Agent Load balancing across identical model deployments
+  routing_strategy: "least-busy"
+
   # Enforce model-level rate limits
   optional_pre_call_checks:
     - enforce_model_rate_limits
 
-  # Retry policy for upstream failures
+  # Retry policy for transient errors before switching to fallback provider
   retry_policy:
     max_retries: 2
     retry_on_status_codes:
@@ -60,10 +367,36 @@ router_settings:
       - 503
       - 504
 
+  # Model aliases for Claude Code and Multi-Agent frameworks
+  model_group_alias:
+    # Claude Code Default Mappings
+    "claude-3-5-sonnet-20241022": "free-coding"
+    "claude-3-7-sonnet-20250219": "free-coding"
+    "claude-3-5-haiku-20241022": "free-fast"
+    "claude-3-opus-20240229": "free-reasoning"
+
+    # Multi-Agent Framework Roles
+    "agent-coder": "free-coding"
+    "agent-planner": "free-reasoning"
+    "agent-reviewer": "free-fast"
+    "agent-architect": "free-reasoning"
+    "agent-tester": "free-fast"
+
+    # Common Model Group Aliases
+    "gpt-4o": "github-gpt-4o"
+    "gpt-4": "free-coding"
+    "deepseek-r1": "free-reasoning"
+    "qwen-2.5-coder": "free-coding"
+
+  # Multi-Tier Fallback Chains for 100% High Availability
+  fallbacks:
+    - "free-coding": ["free-reasoning", "free-fast", "free-auto"]
+    - "free-reasoning": ["free-coding", "free-auto"]
+    - "free-fast": ["free-coding", "free-auto"]
+    - "nvidia-coding": ["free-coding", "free-fast"]
+
 litellm_settings:
-  # Drop unsupported parameters rather than erroring
+  # Drop unsupported vendor parameters gracefully
   drop_params: true
-  # Set request timeout
   request_timeout: 120
-  # Telemetry (disabled for privacy)
   telemetry: false
