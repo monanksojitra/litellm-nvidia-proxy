@@ -1,14 +1,83 @@
-# LiteLLM Proxy Configuration - OpenRouter + Keyless Fallbacks Only
-# Works with just OPENROUTER_API_KEY + Pollinations (no API key needed)
+# LiteLLM Proxy Configuration for Free Multi-Provider LLMs (NVIDIA NIM Primary + 33 Providers)
+# Designed for Claude Code CLI, Cursor, Cline, OpenCode, and Multi-Agent Frameworks
+# Primary Engine: NVIDIA NIM API (Free 1,000 Credits)
+# Keyless Resilient Fallback: Pollinations AI (Zero Setup / Zero Key)
+# All API keys are loaded securely from environment variables.
 # NEVER commit actual secrets or keys to this repository.
 
 model_list:
   # ============================================================================
-  # 1. OPENROUTER PROVIDERS (uses OPENROUTER_API_KEY)
+  # 1. MULTI-AGENT ROLE POOLS & GENERAL CODING POOLS (Load-Balanced & Fallbacks)
   # ============================================================================
 
-  # --- POOL A: agent-coder / free-coding (Code Generation & Tool Calls) ---
-  # OpenRouter Free Models
+  # ----------------------------------------------------------------------------
+  # POOL A: free-coding (Primary Pool for Claude Sonnet, Code Generation & Tools)
+  # ----------------------------------------------------------------------------
+
+  # NVIDIA NIM (Primary: Nemotron Super 49B - Best Instruction & Code Synthesis)
+  - model_name: free-coding
+    litellm_params:
+      model: openai/nvidia/llama-3.3-nemotron-super-49b-v1.5
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      rpm: 60
+      tpm: 100000
+      request_timeout: 120
+
+  # NVIDIA NIM (Llama 3.3 70B Instruct - High Quality General Reasoning & Coding)
+  - model_name: free-coding
+    litellm_params:
+      model: openai/meta/llama-3.3-70b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      rpm: 60
+      tpm: 100000
+      request_timeout: 120
+
+  # NVIDIA NIM (Qwen 2.5 Coder 32B Instruct - Specialized Coding Engine)
+  - model_name: free-coding
+    litellm_params:
+      model: openai/qwen/qwen2.5-coder-32b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      rpm: 60
+      tpm: 100000
+      request_timeout: 120
+
+  # Google AI Studio (Gemini 2.5 Flash - 15 RPM / 1M TPM / 1M Context Window)
+  - model_name: free-coding
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+      rpm: 15
+      tpm: 1000000
+      request_timeout: 120
+
+  # Mistral AI (Codestral - 1 Billion Free Tokens/Mo Grant)
+  - model_name: free-coding
+    litellm_params:
+      model: mistral/codestral-latest
+      api_key: os.environ/MISTRAL_API_KEY
+      request_timeout: 120
+
+  # Groq (Llama 3.3 70B Versatile - 30 RPM / 300+ tok/s Ultra-Fast)
+  - model_name: free-coding
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      tpm: 30000
+      request_timeout: 90
+
+  # SambaNova Cloud (Llama 3.3 70B Instruct - 30 RPM)
+  - model_name: free-coding
+    litellm_params:
+      model: sambanova/Meta-Llama-3.3-70B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+      rpm: 30
+      request_timeout: 120
+
+  # OpenRouter Free (Qwen 2.5 Coder 32B Instruct)
   - model_name: free-coding
     litellm_params:
       model: openrouter/qwen/qwen-2.5-coder-32b-instruct:free
@@ -16,6 +85,7 @@ model_list:
       rpm: 20
       request_timeout: 120
 
+  # OpenRouter Free (Llama 3.3 70B Instruct)
   - model_name: free-coding
     litellm_params:
       model: openrouter/meta-llama/llama-3.3-70b-instruct:free
@@ -23,6 +93,7 @@ model_list:
       rpm: 20
       request_timeout: 120
 
+  # OpenRouter Free (Gemini 2.0 Flash)
   - model_name: free-coding
     litellm_params:
       model: openrouter/google/gemini-2.0-flash-exp:free
@@ -30,21 +101,113 @@ model_list:
       rpm: 20
       request_timeout: 120
 
+  # DeepSeek Direct API (DeepSeek V3 Chat - 5M Free Tokens)
   - model_name: free-coding
     litellm_params:
-      model: openrouter/mistralai/mistral-small-3.1-24b-instruct:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
+      model: deepseek/deepseek-chat
+      api_key: os.environ/DEEPSEEK_API_KEY
       request_timeout: 120
 
+  # Zhipu AI / Z.AI (GLM-4-Flash - Permanently Free & 128k Context)
   - model_name: free-coding
     litellm_params:
-      model: openrouter/nousresearch/hermes-3-llama-3.1-405b:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
+      model: openai/glm-4-flash
+      api_base: https://open.bigmodel.cn/api/paas/v4
+      api_key: os.environ/ZHIPUAI_API_KEY
       request_timeout: 120
 
-  # --- POOL B: agent-planner / free-reasoning (Deep Architecture & Reasoning) ---
+  # Alibaba Cloud DashScope (Qwen 2.5 Coder 32B)
+  - model_name: free-coding
+    litellm_params:
+      model: dashscope/qwen2.5-coder-32b-instruct
+      api_key: os.environ/DASHSCOPE_API_KEY
+      request_timeout: 120
+
+  # SiliconFlow (Qwen 2.5 Coder 32B Instruct - Free Tier)
+  - model_name: free-coding
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-Coder-32B-Instruct
+      api_base: https://api.siliconflow.cn/v1
+      api_key: os.environ/SILICONFLOW_API_KEY
+      request_timeout: 120
+
+  # GitHub Models (Llama 3.3 70B Instruct - Free with GitHub PAT)
+  - model_name: free-coding
+    litellm_params:
+      model: github/meta/Llama-3.3-70B-Instruct
+      api_key: os.environ/GITHUB_API_KEY
+      rpm: 15
+      request_timeout: 120
+
+  # Cloudflare Workers AI (Qwen 2.5 Coder 32B - Free Tier)
+  - model_name: free-coding
+    litellm_params:
+      model: cloudflare/@cf/qwen/qwen2.5-coder-32b-instruct
+      api_base: https://api.cloudflare.com/client/v4/accounts/os.environ/CLOUDFLARE_ACCOUNT_ID/ai/run/
+      api_key: os.environ/CLOUDFLARE_API_KEY
+      request_timeout: 120
+
+  # Pollinations AI (Qwen Coder - 100% Free & Keyless Ultimate Fallback)
+  - model_name: free-coding
+    litellm_params:
+      model: openai/qwen-coder
+      api_base: https://text.pollinations.ai/openai
+      api_key: "pollinations-keyless"
+      request_timeout: 120
+
+  # ----------------------------------------------------------------------------
+  # POOL B: free-reasoning (Complex Architecture, System Design & Opus Tasks)
+  # ----------------------------------------------------------------------------
+
+  # NVIDIA NIM (Primary: DeepSeek R1 - State of the art reasoning)
+  - model_name: free-reasoning
+    litellm_params:
+      model: openai/deepseek-ai/deepseek-r1
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      rpm: 60
+      request_timeout: 180
+
+  # DeepSeek Direct API (DeepSeek R1 Reasoner)
+  - model_name: free-reasoning
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+      request_timeout: 180
+
+  # SambaNova Cloud (DeepSeek R1 Distill Llama 70B - 20 RPM)
+  - model_name: free-reasoning
+    litellm_params:
+      model: sambanova/DeepSeek-R1-Distill-Llama-70B
+      api_key: os.environ/SAMBANOVA_API_KEY
+      rpm: 20
+      request_timeout: 180
+
+  # SambaNova Cloud (Meta Llama 3.1 405B Instruct - Massive 405B Parameter)
+  - model_name: free-reasoning
+    litellm_params:
+      model: sambanova/Meta-Llama-3.1-405B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+      rpm: 20
+      request_timeout: 180
+
+  # Groq (DeepSeek R1 Distill Llama 70B - Ultra Low Latency Reasoning)
+  - model_name: free-reasoning
+    litellm_params:
+      model: groq/deepseek-r1-distill-llama-70b
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      request_timeout: 180
+
+  # Google AI Studio (Gemini 2.0 Flash Thinking Experimental)
+  - model_name: free-reasoning
+    litellm_params:
+      model: gemini/gemini-2.0-flash-thinking-exp-01-21
+      api_key: os.environ/GEMINI_API_KEY
+      rpm: 10
+      request_timeout: 180
+
+  # OpenRouter Free (DeepSeek R1 Full)
   - model_name: free-reasoning
     litellm_params:
       model: openrouter/deepseek/deepseek-r1:free
@@ -52,13 +215,7 @@ model_list:
       rpm: 20
       request_timeout: 180
 
-  - model_name: free-reasoning
-    litellm_params:
-      model: openrouter/deepseek/deepseek-r1-distill-llama-70b:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
-      request_timeout: 180
-
+  # OpenRouter Free (QwQ 32B Reasoning)
   - model_name: free-reasoning
     litellm_params:
       model: openrouter/qwen/qwq-32b:free
@@ -66,63 +223,23 @@ model_list:
       rpm: 20
       request_timeout: 180
 
+  # GitHub Models (o3-mini - Free with GitHub PAT)
   - model_name: free-reasoning
     litellm_params:
-      model: openrouter/google/gemini-2.0-flash-thinking-exp:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
+      model: github/o3-mini
+      api_key: os.environ/GITHUB_API_KEY
+      rpm: 15
       request_timeout: 180
 
-  # --- POOL C: agent-reviewer / free-fast (High Throughput, Low Latency) ---
-  - model_name: free-fast
+  # SiliconFlow (DeepSeek R1)
+  - model_name: free-reasoning
     litellm_params:
-      model: openrouter/qwen/qwen-2.5-coder-32b-instruct:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
-      request_timeout: 60
+      model: openai/deepseek-ai/DeepSeek-R1
+      api_base: https://api.siliconflow.cn/v1
+      api_key: os.environ/SILICONFLOW_API_KEY
+      request_timeout: 180
 
-  - model_name: free-fast
-    litellm_params:
-      model: openrouter/meta-llama/llama-3.1-8b-instruct:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
-      request_timeout: 60
-
-  - model_name: free-fast
-    litellm_params:
-      model: openrouter/google/gemma-2-9b-it:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
-      request_timeout: 60
-
-  - model_name: free-fast
-    litellm_params:
-      model: openrouter/microsoft/phi-3.5-mini-instruct:free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
-      request_timeout: 60
-
-  # --- POOL D: free-auto (OpenRouter Auto Router) ---
-  - model_name: free-auto
-    litellm_params:
-      model: openrouter/openrouter/free
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 20
-      request_timeout: 120
-
-  # ============================================================================
-  # 2. KEYLESS PROVIDERS (Pollinations - No API Key Required)
-  # ============================================================================
-
-  # Pollinations AI - 100% Free & Keyless (works without api_key)
-  # These serve as ultimate fallbacks when OpenRouter is rate limited
-  - model_name: free-coding
-    litellm_params:
-      model: openai/qwen-coder
-      api_base: https://text.pollinations.ai/openai
-      api_key: "pollinations-keyless"  # Dummy key - Pollinations doesn't require real key
-      request_timeout: 120
-
+  # Pollinations AI (DeepSeek R1 - 100% Free & Keyless Ultimate Fallback)
   - model_name: free-reasoning
     litellm_params:
       model: openai/deepseek-r1
@@ -130,12 +247,77 @@ model_list:
       api_key: "pollinations-keyless"
       request_timeout: 180
 
+  # ----------------------------------------------------------------------------
+  # POOL C: free-fast (High Throughput, Low Latency, Haiku / Reviewer Tasks)
+  # ----------------------------------------------------------------------------
+
+  # NVIDIA NIM (Llama 3.1 8B Instruct - Fast & Responsive)
+  - model_name: free-fast
+    litellm_params:
+      model: openai/meta/llama-3.1-8b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      rpm: 60
+      request_timeout: 60
+
+  # Groq (Llama 3.1 8B Instant - 300+ tok/s Ultra Fast)
+  - model_name: free-fast
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      request_timeout: 60
+
+  # Cerebras (Llama 3.1 8B - 1,000+ tok/s Instantaneous)
+  - model_name: free-fast
+    litellm_params:
+      model: cerebras/llama3.1-8b
+      api_key: os.environ/CEREBRAS_API_KEY
+      rpm: 30
+      request_timeout: 60
+
+  # OpenRouter Free (Llama 3.1 8B Instruct)
+  - model_name: free-fast
+    litellm_params:
+      model: openrouter/meta-llama/llama-3.1-8b-instruct:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 60
+
+  # OpenRouter Free (Gemma 2 9B IT)
+  - model_name: free-fast
+    litellm_params:
+      model: openrouter/google/gemma-2-9b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 60
+
+  # OpenRouter Free (Phi 3.5 Mini Instruct)
+  - model_name: free-fast
+    litellm_params:
+      model: openrouter/microsoft/phi-3.5-mini-instruct:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 60
+
+  # Pollinations AI (Qwen Coder Fast Keyless)
   - model_name: free-fast
     litellm_params:
       model: openai/qwen-coder
       api_base: https://text.pollinations.ai/openai
       api_key: "pollinations-keyless"
       request_timeout: 60
+
+  # ----------------------------------------------------------------------------
+  # POOL D: free-auto (Auto-Routing & Hybrid Fallback Pool)
+  # ----------------------------------------------------------------------------
+
+  - model_name: free-auto
+    litellm_params:
+      model: openrouter/openrouter/free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      request_timeout: 120
 
   - model_name: free-auto
     litellm_params:
@@ -145,10 +327,177 @@ model_list:
       request_timeout: 120
 
   # ============================================================================
-  # 3. DIRECT INDIVIDUAL MODEL TARGETS (OpenRouter Only)
+  # 2. DYNAMIC WILDCARD ROUTING (Call ANY model from your local system)
   # ============================================================================
 
-  # OpenRouter Direct Models
+  # NVIDIA NIM Wildcards:
+  # Allows calling ANY current or newly released model from build.nvidia.com without redeploying!
+  # Usage from local machine: 
+  #   - "nim/nvidia/llama-3.3-nemotron-super-49b-v1.5"
+  #   - "nim/meta/llama-3.3-70b-instruct"
+  #   - "nim/deepseek-ai/deepseek-r1"
+  #   - "nim/qwen/qwen2.5-coder-32b-instruct"
+  - model_name: "nim/*"
+    litellm_params:
+      model: openai/*
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  - model_name: "nvidia/*"
+    litellm_params:
+      model: openai/nvidia/*
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  # OpenRouter Wildcard:
+  - model_name: "openrouter/*"
+    litellm_params:
+      model: openrouter/*
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # Google Gemini Wildcard:
+  - model_name: "gemini/*"
+    litellm_params:
+      model: gemini/*
+      api_key: os.environ/GEMINI_API_KEY
+
+  # Groq Wildcard:
+  - model_name: "groq/*"
+    litellm_params:
+      model: groq/*
+      api_key: os.environ/GROQ_API_KEY
+
+  # ============================================================================
+  # 3. DIRECT INDIVIDUAL MODEL ENDPOINTS (For explicitly calling exact models)
+  # ============================================================================
+
+  # --- NVIDIA NIM Direct Models ---
+  - model_name: nvidia-nemotron
+    litellm_params:
+      model: openai/nvidia/llama-3.3-nemotron-super-49b-v1.5
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  - model_name: nvidia-llama-70b
+    litellm_params:
+      model: openai/meta/llama-3.3-70b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  - model_name: nvidia-deepseek-r1
+    litellm_params:
+      model: openai/deepseek-ai/deepseek-r1
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  - model_name: nvidia-qwen-coder
+    litellm_params:
+      model: openai/qwen/qwen2.5-coder-32b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  - model_name: nvidia-llama-8b
+    litellm_params:
+      model: openai/meta/llama-3.1-8b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  # --- Google AI Studio Direct Models ---
+  - model_name: gemini-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: gemini-thinking
+    litellm_params:
+      model: gemini/gemini-2.0-flash-thinking-exp-01-21
+      api_key: os.environ/GEMINI_API_KEY
+
+  # --- Groq Direct Models ---
+  - model_name: groq-llama-70b
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+
+  - model_name: groq-deepseek-r1
+    litellm_params:
+      model: groq/deepseek-r1-distill-llama-70b
+      api_key: os.environ/GROQ_API_KEY
+
+  - model_name: groq-llama-8b
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+
+  # --- Mistral Direct Models ---
+  - model_name: mistral-codestral
+    litellm_params:
+      model: mistral/codestral-latest
+      api_key: os.environ/MISTRAL_API_KEY
+
+  # --- SambaNova Direct Models ---
+  - model_name: sambanova-llama-70b
+    litellm_params:
+      model: sambanova/Meta-Llama-3.3-70B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+
+  - model_name: sambanova-llama-405b
+    litellm_params:
+      model: sambanova/Meta-Llama-3.1-405B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+
+  - model_name: sambanova-deepseek-r1
+    litellm_params:
+      model: sambanova/DeepSeek-R1-Distill-Llama-70B
+      api_key: os.environ/SAMBANOVA_API_KEY
+
+  # --- DeepSeek Direct Models ---
+  - model_name: deepseek-chat
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: deepseek-r1
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  # --- Zhipu AI / Z.AI ---
+  - model_name: zhipu-glm-4-flash
+    litellm_params:
+      model: openai/glm-4-flash
+      api_base: https://open.bigmodel.cn/api/paas/v4
+      api_key: os.environ/ZHIPUAI_API_KEY
+
+  # --- Alibaba DashScope ---
+  - model_name: dashscope-qwen-coder
+    litellm_params:
+      model: dashscope/qwen2.5-coder-32b-instruct
+      api_key: os.environ/DASHSCOPE_API_KEY
+
+  # --- Cerebras Direct Models ---
+  - model_name: cerebras-llama-70b
+    litellm_params:
+      model: cerebras/llama3.3-70b
+      api_key: os.environ/CEREBRAS_API_KEY
+
+  # --- GitHub Direct Models ---
+  - model_name: github-gpt-4o
+    litellm_params:
+      model: github/gpt-4o
+      api_key: os.environ/GITHUB_API_KEY
+
+  - model_name: github-o3-mini
+    litellm_params:
+      model: github/o3-mini
+      api_key: os.environ/GITHUB_API_KEY
+
+  - model_name: github-llama-70b
+    litellm_params:
+      model: github/meta/Llama-3.3-70B-Instruct
+      api_key: os.environ/GITHUB_API_KEY
+
+  # --- OpenRouter Free Direct Models ---
   - model_name: openrouter-qwen-coder
     litellm_params:
       model: openrouter/qwen/qwen-2.5-coder-32b-instruct:free
@@ -159,14 +508,14 @@ model_list:
       model: openrouter/meta-llama/llama-3.3-70b-instruct:free
       api_key: os.environ/OPENROUTER_API_KEY
 
-  - model_name: openrouter-gemini-flash
-    litellm_params:
-      model: openrouter/google/gemini-2.0-flash-exp:free
-      api_key: os.environ/OPENROUTER_API_KEY
-
   - model_name: openrouter-deepseek-r1
     litellm_params:
       model: openrouter/deepseek/deepseek-r1:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-gemini-flash
+    litellm_params:
+      model: openrouter/google/gemini-2.0-flash-exp:free
       api_key: os.environ/OPENROUTER_API_KEY
 
   - model_name: openrouter-qwq
@@ -179,32 +528,12 @@ model_list:
       model: openrouter/nousresearch/hermes-3-llama-3.1-405b:free
       api_key: os.environ/OPENROUTER_API_KEY
 
-  - model_name: openrouter-mistral-small
-    litellm_params:
-      model: openrouter/mistralai/mistral-small-3.1-24b-instruct:free
-      api_key: os.environ/OPENROUTER_API_KEY
-
-  - model_name: openrouter-llama-8b
-    litellm_params:
-      model: openrouter/meta-llama/llama-3.1-8b-instruct:free
-      api_key: os.environ/OPENROUTER_API_KEY
-
-  - model_name: openrouter-gemma-9b
-    litellm_params:
-      model: openrouter/google/gemma-2-9b-it:free
-      api_key: os.environ/OPENROUTER_API_KEY
-
-  - model_name: openrouter-phi-3.5
-    litellm_params:
-      model: openrouter/microsoft/phi-3.5-mini-instruct:free
-      api_key: os.environ/OPENROUTER_API_KEY
-
   - model_name: openrouter-auto-free
     litellm_params:
       model: openrouter/openrouter/free
       api_key: os.environ/OPENROUTER_API_KEY
 
-  # Pollinations Direct (Keyless)
+  # --- Pollinations Keyless Direct Models ---
   - model_name: pollinations-qwen-coder
     litellm_params:
       model: openai/qwen-coder
@@ -223,11 +552,14 @@ model_list:
       api_base: https://text.pollinations.ai/openai
       api_key: "pollinations-keyless"
 
+# ============================================================================
+# GENERAL SECURITY & PROXY CONFIGURATION
+# ============================================================================
 general_settings:
-  # Master key for proxy authentication - MUST be set via LITELLM_MASTER_KEY env var
+  # Master key for proxy authentication - set via LITELLM_MASTER_KEY env var
   master_key: os.environ/LITELLM_MASTER_KEY
 
-  # Only allow authenticated requests to completion endpoints
+  # Unauthenticated public endpoints for health checks
   public_routes:
     - "/health/liveliness"
     - "/health/readiness"
@@ -235,15 +567,18 @@ general_settings:
   background_health_checks: false
   token_rate_limit_type: "total"
 
+# ============================================================================
+# ROUTER, LOAD BALANCING & ALIASES
+# ============================================================================
 router_settings:
-  # Multi-Agent Load balancing across identical model deployments
+  # Multi-provider load balancing
   routing_strategy: "least-busy"
 
   # Enforce model-level rate limits
   optional_pre_call_checks:
     - enforce_model_rate_limits
 
-  # Retry policy for transient errors before switching to fallback provider
+  # Retry policy for transient upstream network or rate-limit issues
   retry_policy:
     max_retries: 2
     retry_on_status_codes:
@@ -253,43 +588,47 @@ router_settings:
       - 503
       - 504
 
-  # Model aliases for Claude Code and Multi-Agent frameworks
+  # Model aliases: Translate Claude Code & framework calls to free pools
   model_group_alias:
-    # Claude Code Default Mappings
-    "claude-3-5-sonnet-20241022": "free-coding"
+    # --- Claude Code CLI Mappings ---
     "claude-3-7-sonnet-20250219": "free-coding"
+    "claude-3-5-sonnet-20241022": "free-coding"
+    "claude-3-5-sonnet-latest": "free-coding"
     "claude-3-5-haiku-20241022": "free-fast"
+    "claude-3-5-haiku-latest": "free-fast"
     "claude-3-opus-20240229": "free-reasoning"
+    "claude-3-opus-latest": "free-reasoning"
 
-    # Multi-Agent Framework Roles
+    # --- Multi-Agent Framework Roles ---
     "agent-coder": "free-coding"
     "agent-planner": "free-reasoning"
     "agent-reviewer": "free-fast"
     "agent-architect": "free-reasoning"
     "agent-tester": "free-fast"
 
-    # Common Model Group Aliases
-    "gpt-4o": "openrouter-llama-70b"
+    # --- Common Model Aliases ---
+    "gpt-4o": "free-coding"
     "gpt-4": "free-coding"
-    "deepseek-r1": "free-reasoning"
-    "deepseek-v3": "free-coding"
-    "qwen-2.5-coder": "free-coding"
-    "codestral": "openrouter-mistral-small"
-    "glm-4-flash": "openrouter-gemini-flash"
+    "codestral": "mistral-codestral"
+    "glm-4-flash": "zhipu-glm-4-flash"
+    "nvidia-coding": "free-coding"
 
-  # Simplified Fallback Chains - Only OpenRouter + Pollinations (keyless)
+  # Automatic multi-tier fallback chains
   fallbacks:
     - "free-coding": ["free-reasoning", "free-fast", "free-auto"]
     - "free-reasoning": ["free-coding", "free-auto"]
     - "free-fast": ["free-coding", "free-auto"]
     - "free-auto": ["free-fast"]
-    - "openrouter-qwen-coder": ["openrouter-llama-70b", "free-coding", "pollinations-qwen-coder"]
-    - "openrouter-deepseek-r1": ["openrouter-qwq", "free-reasoning", "pollinations-deepseek-r1"]
-    - "openrouter-llama-70b": ["openrouter-qwen-coder", "free-coding", "pollinations-qwen-coder"]
-    - "openrouter-auto-free": ["free-auto", "pollinations-claude-hybrid"]
+    - "nvidia-nemotron": ["nvidia-llama-70b", "free-coding", "pollinations-qwen-coder"]
+    - "nvidia-deepseek-r1": ["free-reasoning", "pollinations-deepseek-r1"]
+    - "openrouter-qwen-coder": ["nvidia-nemotron", "free-coding", "pollinations-qwen-coder"]
+    - "openrouter-deepseek-r1": ["nvidia-deepseek-r1", "free-reasoning", "pollinations-deepseek-r1"]
 
+# ============================================================================
+# LITELLM SYSTEM SETTINGS
+# ============================================================================
 litellm_settings:
-  # Drop unsupported vendor parameters gracefully
+  # Drop unsupported vendor parameters (e.g. Anthropic specific headers) gracefully
   drop_params: true
   request_timeout: 120
   telemetry: false

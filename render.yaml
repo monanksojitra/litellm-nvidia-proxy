@@ -1,60 +1,41 @@
-# Render Blueprint for LiteLLM Multi-Provider Free Proxy (33 Providers)
-# This file defines the service configuration for Render
-# Secrets must be added manually in Render dashboard
-# DO NOT commit actual secret values to this file
+# Render Blueprint for LiteLLM Free Multi-Provider Proxy (NVIDIA NIM Primary)
+# Service definition for deploying to Render Free Tier
+# Set your API keys in Render Dashboard -> Environment Variables
+# NEVER commit actual secret values to version control
 
 services:
   - type: web
-    name: litellm-free-proxy
+    name: litellm-nvidia-proxy
     runtime: docker
     plan: free
-    region: oregon  # or your preferred region
+    region: oregon  # Choose your preferred Render region
     dockerfilePath: ./Dockerfile
-    # Health check endpoint (no auth required)
+    # Public health check endpoint (no authentication needed)
     healthCheckPath: /health/liveliness
-    # Port - Render injects PORT env var, Dockerfile uses ${PORT:-4000}
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: LITELLM_TELEMETRY
         value: "false"
-      # Supported Provider Keys (Add desired ones in Render Dashboard -> Environment):
-      # - LITELLM_MASTER_KEY: sk-your-generated-master-key (Required)
-      # - GEMINI_API_KEY: AIzaSy... (Google AI Studio)
-      # - MISTRAL_API_KEY: ... (Mistral AI - Codestral 1B free tokens/mo)
-      # - GROQ_API_KEY: gsk_... (Groq - Ultra-fast 300+ tok/s)
-      # - SAMBANOVA_API_KEY: ... (SambaNova Cloud - Llama 405B & R1)
+
+      # ------------------------------------------------------------------------
+      # REQUIRED CONFIGURATION:
+      # ------------------------------------------------------------------------
+      # - LITELLM_MASTER_KEY: sk-your-secure-custom-key (Used to authenticate Claude Code / clients)
+      # - NVIDIA_API_KEY: nvapi-... (Primary Free Provider - 1,000 free credits from build.nvidia.com)
+
+      # ------------------------------------------------------------------------
+      # OPTIONAL FREE PROVIDER KEYS (Add any you want to enable extra pools/fallbacks):
+      # ------------------------------------------------------------------------
+      # - OPENROUTER_API_KEY: sk-or-... (OpenRouter Free Tier Models)
+      # - GEMINI_API_KEY: AIzaSy... (Google AI Studio - Gemini 2.5 Flash / 15 RPM free)
+      # - GROQ_API_KEY: gsk_... (Groq - Llama 3.3 70B ultra-fast 300+ tok/s)
+      # - MISTRAL_API_KEY: ... (Mistral AI - Codestral 1 Billion free tokens/mo)
+      # - SAMBANOVA_API_KEY: ... (SambaNova Cloud - Llama 3.1 405B & DeepSeek R1)
+      # - CEREBRAS_API_KEY: csk-... (Cerebras - Llama 3.1 8B 1,000+ tok/s)
+      # - GITHUB_API_KEY: ghp_... (GitHub Personal Access Token - GPT-4o & o3-mini)
       # - DEEPSEEK_API_KEY: sk-... (DeepSeek Direct API - 5M free tokens)
-      # - ZHIPUAI_API_KEY: ... (Zhipu AI / Z.AI - GLM-4-Flash permanently free)
-      # - DASHSCOPE_API_KEY: sk-... (Alibaba Cloud Model Studio / Qwen)
-      # - SILICONFLOW_API_KEY: sk-... (SiliconFlow Cloud - Uncapped free tier)
-      # - HYPERBOLIC_API_KEY: ... (Hyperbolic AI - $10 free credits)
-      # - NOVITA_API_KEY: ... (Novita AI - Free starter credits)
-      # - POLLINATIONS_API_KEY: (Optional - 100% Keyless zero-cost fallback)
-      # - CEREBRAS_API_KEY: csk-... (Cerebras - 1,000+ tok/s)
-      # - GITHUB_API_KEY: ghp_... (GitHub Personal Access Token - GPT-4o / o3-mini)
-      # - CLOUDFLARE_API_KEY: ... + CLOUDFLARE_ACCOUNT_ID: ... (Cloudflare Workers AI)
-      # - HF_TOKEN: hf_... (Hugging Face Serverless)
-      # - BAIDU_API_KEY: ... (Baidu Qianfan - ERNIE Speed permanently free)
-      # - HUNYUAN_API_KEY: ... (Tencent Hunyuan - Hunyuan Lite permanently free)
-      # - SCALEWAY_API_KEY: ... (Scaleway AI - European sovereign free credits)
-      # - OVHCLOUD_API_KEY: ... (OVHcloud AI Endpoints - Monthly free allowance)
-      # - TOGETHERAI_API_KEY: ... (Together AI - $25 free trial credit)
-      # - DEEPINFRA_API_KEY: ... (DeepInfra - Free trial credits)
-      # - NEBIUS_API_KEY: ... (Nebius AI Studio - Llama 405B & R1)
-      # - FIREWORKS_AI_API_KEY: ... (Fireworks AI - Sub-second R1)
-      # - COHERE_API_KEY: ... (Cohere Developer Trial - 100 RPM)
-      # - AI21_API_KEY: ... (AI21 Labs - Jamba 1.5 256k context)
-      # - UPSTAGE_API_KEY: ... (Upstage Solar - $10 free credits)
-      # - MOONSHOT_API_KEY: ... (Moonshot AI / Kimi - Free starter credits)
-      # - PERPLEXITYAI_API_KEY: ... (Perplexity AI - Sonar Reasoning)
-      # - NVIDIA_API_KEY: nvapi-... (NVIDIA NIM - 1,000 free credits)
-      # - STEPFUN_API_KEY: ... (StepFun - Free starter credits)
-      # - FRIENDLI_TOKEN: ... (FriendliAI - Free trial credits)
-      # - AIMLAPI_KEY: ... (AIML API - Multi-model free aggregator)
-      # - OPENROUTER_API_KEY: sk-or-... (OpenRouter Free)
-    # Free tier limitations:
-    # - Spins down after 15 minutes of inactivity (cold start ~30-60s)
-    # - 512 MB RAM, 0.5 CPU
-    # - No persistent disks, no background workers
-    # - 750 hours/month free
+      # - ZHIPUAI_API_KEY: ... (Zhipu AI - GLM-4-Flash permanently free)
+      # - DASHSCOPE_API_KEY: sk-... (Alibaba Cloud - Qwen 2.5 Coder 32B)
+      # - SILICONFLOW_API_KEY: sk-... (SiliconFlow Cloud - DeepSeek R1 & Qwen)
+      # - CLOUDFLARE_API_KEY: ... + CLOUDFLARE_ACCOUNT_ID: ... (Workers AI)

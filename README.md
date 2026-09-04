@@ -1,272 +1,212 @@
-# LiteLLM Multi-Provider Free Proxy for Single & Multi-Agent Workflows
+# LiteLLM Free Multi-Provider Proxy (NVIDIA NIM Primary + 33 Free Providers)
 
-A high-performance LiteLLM proxy designed to route **Claude Code** and **Multi-Agent Systems** (AutoGen, CrewAI, LangGraph, Aider, Cursor, Cline) across **33 Free & Freemium LLM Providers** (modeled after OmniRoute) with automatic load balancing, multi-agent role pools, and resilient failover chains.
+A production-ready, ultra-resilient LiteLLM proxy tailored for **Claude Code CLI**, Cursor, Cline, OpenCode, and Multi-Agent Frameworks (AutoGen, CrewAI, LangGraph). 
+
+Features **NVIDIA NIM** as the primary high-performance engine, backed by **33 Free Tier Providers** and a **100% Keyless Fallback** (Pollinations AI) so your agent workflows never stop due to rate limits or outages.
 
 ---
 
-## Architecture
+## ⚡ Key Highlights
+
+- 🚀 **NVIDIA NIM as Main Engine**: High-speed, high-context models (`nvidia/llama-3.3-nemotron-super-49b-v1.5`, `meta/llama-3.3-70b-instruct`, `deepseek-ai/deepseek-r1`, `qwen/qwen2.5-coder-32b-instruct`).
+- 🤖 **Native Claude Code Support**: Drop-in replacement for Anthropic API endpoints (`/v1/messages` and `/v1/chat/completions`).
+- 🛡️ **Zero-Downtime Fallback Chains**: If NVIDIA NIM or any provider hits a rate limit (429) or error (5xx), LiteLLM automatically routes to the next best free model seamlessly.
+- 🔑 **Keyless Safety Net**: Pollinations AI is pre-configured with zero API keys required as the ultimate baseline fallback.
+- ☁️ **One-Click Render Free Deployment**: Docker-based, stateless, memory-efficient setup with public health endpoints.
+
+---
+
+## 🏗️ Architecture & Logical Role Pools
 
 ```
-                       Single Agent (Claude Code) OR Multi-Agent Swarms
-                                      │
-                                      │ HTTP / Anthropic / OpenAI Format
-                                      │ Authorization: Bearer $LITELLM_MASTER_KEY
-                                      ▼
+                           Claude Code CLI / Cursor / Multi-Agent Swarms
+                                                │
+                                                │ Anthropic / OpenAI Format
+                                                │ Authorization: Bearer $LITELLM_MASTER_KEY
+                                                ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        LiteLLM Intelligent Multi-Agent Gateway                         │
+│                        LiteLLM Intelligent Multi-Provider Router                       │
 │                                                                                        │
-│  Multi-Agent Role Pools:                                                               │
-│  • `agent-coder` / `free-coding`       ──► (Gemini 2.5, Codestral, Groq 70B, Qwen,     │
-│                                             SambaNova 70B, Zhipu GLM, DashScope,       │
-│                                             Hyperbolic, DeepSeek V3, Together, Scaleway)│
-│  • `agent-planner` / `free-reasoning`  ──► (DeepSeek Direct R1, SambaNova 405B,        │
-│                                             Gemini Think, o3-mini, Nebius 405B,        │
-│                                             Novita R1, Hyperbolic R1, AI21 Jamba, R+)  │
-│  • `agent-reviewer` / `free-fast`      ──► (Cerebras 1000 tok/s, Groq 8B, ERNIE Speed, │
-│                                             Hunyuan Lite, Cloudflare AI, Solar Mini)   │
-│  • `free-auto`                         ──► (OpenRouter Free, Pollinations Keyless)     │
+│  Role Pools & Priority Fallbacks:                                                      │
+│  • free-coding (Sonnet 3.7 / 3.5)      ──► 1. NVIDIA NIM Nemotron Super 49B            │
+│                                            2. NVIDIA NIM Llama 3.3 70B                 │
+│                                            3. NVIDIA NIM Qwen 2.5 Coder 32B            │
+│                                            4. Google Gemini 2.5 Flash                  │
+│                                            5. Mistral Codestral                        │
+│                                            6. Groq Llama 3.3 70B                       │
+│                                            7. OpenRouter Free Models                   │
+│                                            8. Pollinations AI (Keyless Emergency)      │
 │                                                                                        │
-│  Failover Chain (429 Rate-Limit & 5xx Outage Protection):                              │
-│  `free-coding` ──► `free-reasoning` ──► `free-fast` ──► `free-auto`                   │
-└───────────────────────────────────────────┬────────────────────────────────────────────┘
-                                            │
-   ┌────────────────────────────────────────┼────────────────────────────────────────┐
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│Google Gemini │                         │  Mistral AI  │                         │     Groq     │
-│Gemini 2.5/2.0│                         │  Codestral   │                         │ Llama 3.3 70B│
-│(1M-2M Context│                         │(1B Tokens/mo)│                         │ (300+ tok/s) │
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│  SambaNova   │                         │   Zhipu AI   │                         │DeepSeek Direct
-│  Llama 405B  │                         │ GLM-4-Flash  │                         │ DeepSeek-R1  │
-│ (DeepSeek R1)│                         │(Free Forever)│                         │ (5M Tokens)  │
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│  DashScope   │                         │  Hyperbolic  │                         │   Cerebras   │
-│  Qwen Coder  │                         │ DeepSeek-R1  │                         │ 1,000+ tok/s │
-│ (1M Tokens)  │                         │ ($10 Credits)│                         │ (Llama 70B)  │
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│ GitHub Models│                         │ SiliconFlow  │                         │ Pollinations │
-│ GPT-4o / o3  │                         │  Qwen / R1   │                         │ 100% Keyless │
-│ (GitHub PAT) │                         │(Uncapped Free│                         │(Zero-Cost AI)│
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│  Cloudflare  │                         │ Hugging Face │                         │ Baidu Qianfan│
-│  Workers AI  │                         │  Serverless  │                         │ ERNIE Speed  │
-│(10k neurons) │                         │ (Free Token) │                         │(Free Forever)│
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│Tencent Hunyuan                         │ Scaleway AI  │                         │   OVHcloud   │
-│ Hunyuan Lite │                         │  Llama 3.3   │                         │ AI Endpoints │
-│(Free Forever)│                         │(Euro Sovereign                         │(Monthly Free)│
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│  Together AI │                         │  DeepInfra   │                         │  Nebius AI   │
-│ ($25 Credits)│                         │ DeepSeek-R1  │                         │  Llama 405B  │
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│ Fireworks AI │                         │    Cohere    │                         │  AI21 Labs   │
-│ DeepSeek-R1  │                         │Command R+ 128│                         │Jamba 1.5 256k│
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│ Upstage Solar│                         │ Moonshot Kimi│                         │Perplexity AI │
-│  Solar Pro   │                         │ Kimi K2.6    │                         │Sonar Reason  │
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐                         ┌──────────────┐
-│  NVIDIA NIM  │                         │   StepFun    │                         │  FriendliAI  │
-│Nemotron Super│                         │  Step-1/2    │                         │ Llama 3.3 70B│
-└──────────────┘                         └──────────────┘                         └──────────────┘
-   ▼                                        ▼
-┌──────────────┐                         ┌──────────────┐
-│   AIML API   │                         │  OpenRouter  │
-│  Aggregator  │                         │:free models  │
-└──────────────┘                         └──────────────┘
+│  • free-reasoning (Opus / Planning)    ──► 1. NVIDIA NIM DeepSeek R1                   │
+│                                            2. DeepSeek R1 Direct API                   │
+│                                            3. SambaNova DeepSeek R1 / Llama 405B       │
+│                                            4. Groq DeepSeek R1 Distill 70B             │
+│                                            5. Gemini 2.0 Flash Thinking                │
+│                                            6. GitHub Models (o3-mini)                  │
+│                                            7. OpenRouter / Pollinations DeepSeek R1    │
+│                                                                                        │
+│  • free-fast (Haiku / Fast Reviewer)   ──► 1. NVIDIA NIM Llama 3.1 8B                  │
+│                                            2. Groq Llama 3.1 8B Instant (300+ tok/s)   │
+│                                            3. Cerebras Llama 3.1 8B (1,000+ tok/s)     │
+│                                            4. OpenRouter / Pollinations Fast Models    │
+│                                                                                        │
+│  • free-auto (Auto Fallback)           ──► OpenRouter Free Auto / Pollinations Hybrid  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 33 Supported Free Providers & API Portals
+## 📋 Model Mappings for Claude Code
 
-You can supply any combination of API keys to the proxy. The router automatically uses what is configured and skips unset keys.
+When Claude Code connects to this proxy, model requests are automatically mapped as follows:
 
-| # | Provider | Top Free Models | Free Quota | Best For | Get API Key |
-|---|:---|:---|:---|:---|:---|
-| 1 | **Google AI Studio** | `gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-2.0-flash-thinking` | **15 RPM / 1M TPM** (1,500 req/day) | 🥇 1M-2M context, tool calling | [aistudio.google.com](https://aistudio.google.com/) |
-| 2 | **Mistral AI** | `codestral-latest`, `mistral-small-latest` | **1 Billion tokens/month** | 💻 Dedicated code generation | [console.mistral.ai](https://console.mistral.ai/api-keys/) |
-| 3 | **Groq** | `llama-3.3-70b-versatile`, `qwen-2.5-coder-32b`, `llama-3.1-8b-instant` | **30 RPM / 30k TPM** | ⚡ Real-time agent speed (300+ tok/s) | [console.groq.com](https://console.groq.com/keys) |
-| 4 | **SambaNova Cloud** | `Meta-Llama-3.1-405B-Instruct`, `DeepSeek-R1-Distill-Llama-70B` | **20-30 RPM** | 🧠 Massive 405B open model & DeepSeek R1 | [cloud.sambanova.ai](https://cloud.sambanova.ai/) |
-| 5 | **DeepSeek Direct** | `deepseek-chat` (V3), `deepseek-reasoner` (R1) | **5 Million free tokens** | 🎯 Official native DeepSeek reasoning | [platform.deepseek.com](https://platform.deepseek.com/) |
-| 6 | **Zhipu AI (GLM / Z.AI)**| `glm-4-flash`, `glm-4.5-flash` | **Permanently Free (Uncapped)** | 🌐 128k context, bilingual coding | [open.bigmodel.cn](https://open.bigmodel.cn/) |
-| 7 | **Alibaba DashScope** | `qwen2.5-coder-32b-instruct`, `qwen-plus`, `qwen-turbo` | **1 Million free tokens/model** | 🚀 Native Qwen 2.5 Coder & Max | [bailian.console.aliyun.com](https://bailian.console.aliyun.com/) |
-| 8 | **Hyperbolic AI** | `DeepSeek-R1`, `Qwen2.5-Coder-32B-Instruct`, `Llama-3.3-70B` | **$10 Free Credits** | ⚡ High-speed dedicated GPU clusters | [app.hyperbolic.xyz](https://app.hyperbolic.xyz/) |
-| 9 | **Novita AI** | `deepseek/deepseek-r1`, `meta-llama/llama-3.3-70b-instruct` | Free trial credits | 🚀 Serverless DeepSeek R1 & Llama 70B | [novita.ai](https://novita.ai/) |
-| 10 | **Pollinations AI** | `deepseek-r1`, `claude-hybrid`, `qwen-coder` | **100% Free & Keyless** | 🔄 Zero-config emergency fallback | [pollinations.ai](https://pollinations.ai/) |
-| 11 | **Cerebras** | `llama-3.3-70b`, `llama3.1-8b` | **30 RPM / 60k TPM** | ⚡ Ultra-low latency (1,000+ tok/s) | [cloud.cerebras.ai](https://cloud.cerebras.ai/) |
-| 12 | **GitHub Models** | `gpt-4o`, `gpt-4o-mini`, `o3-mini`, `DeepSeek-R1`, `Llama-3.3-70B` | **15-50 RPM** (Free with PAT) | 🛠️ GPT-4o & o3-mini via GitHub PAT | [github.com/marketplace/models](https://github.com/marketplace/models) |
-| 13 | **SiliconFlow** | `DeepSeek-R1`, `DeepSeek-V3`, `Qwen2.5-Coder-32B-Instruct` | Millions of free tokens / uncapped | 💻 High-speed coding & DeepSeek R1 | [cloud.siliconflow.cn](https://cloud.siliconflow.cn/) |
-| 14 | **Cloudflare Workers AI**| `@cf/meta/llama-3.3-70b-instruct`, `@cf/qwen/qwen2.5-coder-32b-instruct`| **10,000 neurons/day free** | 🌐 Edge inference & reviewer agent | [dash.cloudflare.com](https://dash.cloudflare.com/) |
-| 15 | **Hugging Face** | `Qwen/Qwen2.5-Coder-32B-Instruct`, `meta-llama/Llama-3.3-70B-Instruct` | Free Serverless API with User Token | 🔀 Broad open-source ecosystem | [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) |
-| 16 | **Baidu Qianfan** | `ernie-speed-128k`, `ernie-lite-8k`, `ernie-4.0-8k` | **Permanently Free (Uncapped)** | 🔍 Ultra-fast reasoning & general NLP | [qianfan.cloud.baidu.com](https://qianfan.cloud.baidu.com/) |
-| 17 | **Tencent Hunyuan** | `hunyuan-lite`, `hunyuan-standard` | **Permanently Free (Uncapped)** | 🛡️ Background auditing & review | [cloud.tencent.com](https://cloud.tencent.com/product/hunyuan) |
-| 18 | **Scaleway AI** | `llama-3.3-70b-instruct`, `deepseek-r1` | Free European cloud credits | 🇪🇺 European sovereign cloud inference | [scaleway.com](https://www.scaleway.com/en/ai-products/) |
-| 19 | **OVHcloud AI** | `meta-llama-3.3-70b-instruct`, `mistral-small` | Monthly free tier allowance | 🇪🇺 European enterprise AI endpoints | [ovhcloud.com](https://www.ovhcloud.com/en/public-cloud/ai-endpoints/) |
-| 20 | **Together AI** | `Qwen/Qwen2.5-Coder-32B-Instruct`, `Meta-Llama-3.1-70B-Instruct-Turbo` | **$25 Free trial credits** | 🚀 High-throughput code generation | [api.together.ai](https://api.together.ai/) |
-| 21 | **DeepInfra** | `deepseek-ai/DeepSeek-R1`, `Qwen/Qwen2.5-Coder-32B-Instruct` | Free trial credits | 🎯 Fast DeepSeek R1 & Qwen Coder | [deepinfra.com](https://deepinfra.com/) |
-| 22 | **Nebius AI Studio** | `meta-llama/Meta-Llama-3.1-405B-Instruct`, `DeepSeek-R1` | Free credits on signup | 🏢 High performance Llama 405B | [studio.nebius.ai](https://studio.nebius.ai/) |
-| 23 | **Fireworks AI** | `accounts/fireworks/models/deepseek-r1` | Free trial credit | ⚡ Sub-second reasoning inference | [fireworks.ai](https://fireworks.ai/) |
-| 24 | **Cohere** | `command-r-plus`, `command-r` | Free Developer Trial Key (100 RPM) | 🔍 High-precision RAG & complex reasoning | [dashboard.cohere.com](https://dashboard.cohere.com/api-keys) |
-| 25 | **AI21 Labs** | `jamba-1.5-large`, `jamba-1.5-mini` | **$10 Free trial credits (256k ctx)** | 📚 Massive context hybrid Mamba-Transformer| [studio.ai21.com](https://studio.ai21.com/) |
-| 26 | **Upstage** | `solar-pro`, `solar-mini` | **$10 Free trial credit** | 🎯 Agentic function calling & reasoning | [console.upstage.ai](https://console.upstage.ai/) |
-| 27 | **Moonshot AI (Kimi)** | `kimi-k2.6`, `moonshot-v1-8k` | Free trial credits (128k context) | 📝 Deep context code analysis | [platform.moonshot.cn](https://platform.moonshot.cn/) |
-| 28 | **Perplexity AI** | `sonar-reasoning`, `sonar` | Developer trial tier | 🌐 Web-grounded live reasoning | [perplexity.ai](https://www.perplexity.ai/settings/api) |
-| 29 | **NVIDIA NIM** | `nvidia/llama-3.3-nemotron-super-49b-v1.5`, `deepseek-r1` | **1,000 free credits** | 🎯 Hybrid Nemotron reasoning | [build.nvidia.com](https://build.nvidia.com/) |
-| 30 | **StepFun** | `step-1-8k`, `step-2-16k` | Free starter credits | 🧩 Multi-step reasoning & execution | [platform.stepfun.com](https://platform.stepfun.com/) |
-| 31 | **FriendliAI** | `meta-llama-3.3-70b-instruct` | Free trial credits | ⚡ Ultra-fast Llama inference | [friendli.ai](https://friendli.ai/) |
-| 32 | **AIML API** | `deepseek-r1`, `llama-3.3-70b` | Free tier requests | 🔀 Multi-model aggregator fallback | [aimlapi.com](https://aimlapi.com/) |
-| 33 | **OpenRouter** | `openrouter/free` (auto-router), `llama-3.3-70b:free`, `deepseek-r1:free` | **20 RPM** (50-1000 req/day) | 🔄 Universal fallback across free models | [openrouter.ai/keys](https://openrouter.ai/keys) |
-
----
-
-## Multi-Agent & Single-Agent Role Pools
-
-When running multi-agent swarms (e.g. Architect + Coder + Reviewer) or single agents (Claude Code), routing to role-specific pools prevents rate limits and optimizes latency:
-
-```yaml
-# Available Logical Pools in config.yaml:
-free-coding     # Primary Coding & Tool Calling Pool (Gemini 2.5, Codestral, Groq 70B, Qwen Coder, GLM, DashScope, Hyperbolic, etc.)
-free-reasoning  # Deep Architecture & Reasoning Pool (DeepSeek Direct R1, SambaNova 405B, Nebius 405B, o3-mini, Novita R1, Jamba 1.5)
-free-fast       # Ultra-Low Latency Reviewer Pool (Cerebras 1,000 tok/s, Groq 8B, ERNIE Speed, Hunyuan Lite, Cloudflare, Solar Mini)
-free-auto       # OpenRouter & Pollinations Rotating Free Auto-Router Pool
-```
-
-### Role Aliases Mapping
-
-| Framework Agent Role | Mapped Logical Pool | Target Use Case |
+| Claude Code Model Request | Mapped Proxy Pool | Primary Free Model Used |
 | :--- | :--- | :--- |
-| `agent-coder` / `claude-3-5-sonnet` / `claude-3-7-sonnet` | `free-coding` | File editing, writing code, executing bash tool calls |
-| `agent-planner` / `agent-architect` / `claude-3-opus` | `free-reasoning` | High-level system design, multi-step plan decomposition |
-| `agent-reviewer` / `agent-tester` / `claude-3-5-haiku` | `free-fast` | Fast linter checks, test suite audits, rapid completions |
+| `claude-3-7-sonnet-20250219` | `free-coding` | NVIDIA Nemotron Super 49B / Llama 3.3 70B |
+| `claude-3-5-sonnet-20241022` | `free-coding` | NVIDIA Nemotron Super 49B / Gemini 2.5 Flash |
+| `claude-3-5-haiku-20241022` | `free-fast` | NVIDIA Llama 3.1 8B / Groq 8B Instant |
+| `claude-3-opus-20240229` | `free-reasoning` | NVIDIA DeepSeek R1 / SambaNova 405B |
 
 ---
 
-## Claude Code Integration
+## 🎯 Direct Model Endpoints & Dynamic Wildcard Selection
 
-### 1. Configure Shell Environment
+### 1. Direct Named Models
+- **NVIDIA NIM**: `nvidia-nemotron`, `nvidia-llama-70b`, `nvidia-deepseek-r1`, `nvidia-qwen-coder`, `nvidia-llama-8b`
+- **Google Gemini**: `gemini-flash`, `gemini-thinking`
+- **Groq**: `groq-llama-70b`, `groq-deepseek-r1`, `groq-llama-8b`
+- **Mistral**: `mistral-codestral`
+- **SambaNova**: `sambanova-llama-70b`, `sambanova-llama-405b`, `sambanova-deepseek-r1`
+- **GitHub Models**: `github-gpt-4o`, `github-o3-mini`, `github-llama-70b`
+- **OpenRouter Free**: `openrouter-qwen-coder`, `openrouter-llama-70b`, `openrouter-deepseek-r1`, `openrouter-auto-free`
+- **Pollinations (Keyless)**: `pollinations-qwen-coder`, `pollinations-deepseek-r1`, `pollinations-claude-hybrid`
 
-Add to `~/.bashrc` or `~/.zshrc`:
+### 2. ⚡ Dynamic Model Passthrough (Use ANY NVIDIA NIM Model from Local)
+Whenever NVIDIA adds a new free or preview model on [build.nvidia.com](https://build.nvidia.com/explore/discover), you **do not need to redeploy the proxy**. You can call it directly using the `nim/<model-path>` prefix:
+
+- `nim/nvidia/llama-3.3-nemotron-super-49b-v1.5`
+- `nim/meta/llama-3.3-70b-instruct`
+- `nim/deepseek-ai/deepseek-r1`
+- `nim/qwen/qwen2.5-coder-32b-instruct`
+- `nim/mistralai/mistral-large-2-instruct`
+
+---
+
+## 🚀 Claude Code CLI Quickstart
+
+### 1. Set Environment Variables
+Add the following to your `~/.bashrc`, `~/.zshrc`, or project `.env`:
 
 ```bash
-# Point Claude Code to your LiteLLM Proxy
-export ANTHROPIC_BASE_URL="https://your-litellm-proxy.onrender.com"
+# Point Claude Code to your deployed LiteLLM proxy (or http://localhost:4000 for local testing)
+export ANTHROPIC_BASE_URL="https://your-proxy-name.onrender.com"
 
-# LiteLLM Master Key (Must match LITELLM_MASTER_KEY configured on proxy)
+# The master key you defined in LITELLM_MASTER_KEY
+export ANTHROPIC_AUTH_TOKEN="sk-your-litellm-master-key"
 export ANTHROPIC_API_KEY="sk-your-litellm-master-key"
 
-# (Optional) Explicitly select a model pool or let it default to Sonnet mapping
-export ANTHROPIC_MODEL="free-coding"
+# OPTIONAL: Explicitly pick any model from your local system (or let it use default free-coding pool)
+# Example 1: Use specific NVIDIA model directly
+export ANTHROPIC_MODEL="nvidia-nemotron"
+# Example 2: Use any dynamic NVIDIA NIM model from build.nvidia.com
+# export ANTHROPIC_MODEL="nim/meta/llama-3.3-70b-instruct"
+# Example 3: Model pool mappings
+# export ANTHROPIC_DEFAULT_SONNET_MODEL="free-coding"
+# export ANTHROPIC_DEFAULT_OPUS_MODEL="free-reasoning"
+# export ANTHROPIC_DEFAULT_HAIKU_MODEL="free-fast"
 ```
 
-### 2. Verify Proxy Connection
-
+### 2. Verify Connection
 ```bash
-# Public Health Check
-curl "$ANTHROPIC_BASE_URL/health/liveliness"
+# 1. Health check (public)
+curl "https://your-proxy-name.onrender.com/health/liveliness"
 
-# Test Primary Coding Pool
-curl "$ANTHROPIC_BASE_URL/v1/chat/completions" \
-  -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
+# 2. Test NVIDIA NIM / Primary Coding Pool
+curl "https://your-proxy-name.onrender.com/v1/chat/completions" \
+  -H "Authorization: Bearer sk-your-litellm-master-key" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "free-coding",
-    "messages": [{"role": "user", "content": "Write a Python fibonacci generator."}],
-    "max_tokens": 100
+    "messages": [{"role": "user", "content": "Hello! Say hi from NVIDIA NIM."}],
+    "max_tokens": 50
   }'
 ```
 
-### 3. Start Claude Code
-
+### 3. Launch Claude Code
 ```bash
 claude
 ```
 
+Claude Code will now route all commands, tool calling, and coding steps through your proxy with NVIDIA NIM and the free provider pool!
+
 ---
 
-## Render Deployment
+## ☁️ Deploy to Render in 3 Steps
 
-### 1. Push to GitHub
+### Step 1: Push Repository to GitHub
 ```bash
 git add .
-git commit -m "Configure 33 free LLM providers with multi-agent pools"
-git push origin main
+git commit -m "Configure NVIDIA NIM primary and free provider proxy"
+git push origin master
 ```
 
-### 2. Deploy on Render
+### Step 2: Create Web Service on Render
 1. Go to [Render Dashboard](https://dashboard.render.com).
-2. Create **New Web Service** → Connect repository.
-3. Select **Docker** runtime on **Free Plan**.
-4. Set `healthCheckPath` to `/health/liveliness`.
+2. Click **New +** → **Web Service** → Connect your GitHub repository.
+3. Configuration:
+   - **Environment**: `Docker`
+   - **Plan**: `Free`
+   - **Health Check Path**: `/health/liveliness`
 
-### 3. Add Environment Variables on Render
-Add `LITELLM_MASTER_KEY` along with whichever free provider keys you have registered:
+### Step 3: Add Environment Variables in Render Dashboard
+Go to **Environment** tab in Render and add:
 
-- `LITELLM_MASTER_KEY` (`sk-...`)
-- `GEMINI_API_KEY`
-- `MISTRAL_API_KEY`
-- `GROQ_API_KEY`
-- `SAMBANOVA_API_KEY`
-- `DEEPSEEK_API_KEY`
-- `ZHIPUAI_API_KEY`
-- `DASHSCOPE_API_KEY`
-- `SILICONFLOW_API_KEY`
-- `HYPERBOLIC_API_KEY`
-- `NOVITA_API_KEY`
-- `CEREBRAS_API_KEY`
-- `GITHUB_API_KEY`
-- `CLOUDFLARE_API_KEY` & `CLOUDFLARE_ACCOUNT_ID`
-- `HF_TOKEN`
-- `BAIDU_API_KEY`
-- `HUNYUAN_API_KEY`
-- `SCALEWAY_API_KEY`
-- `OVHCLOUD_API_KEY`
-- `TOGETHERAI_API_KEY`
-- `DEEPINFRA_API_KEY`
-- `NEBIUS_API_KEY`
-- `FIREWORKS_AI_API_KEY`
-- `COHERE_API_KEY`
-- `AI21_API_KEY`
-- `UPSTAGE_API_KEY`
-- `MOONSHOT_API_KEY`
-- `PERPLEXITYAI_API_KEY`
-- `NVIDIA_API_KEY`
-- `STEPFUN_API_KEY`
-- `FRIENDLI_TOKEN`
-- `AIMLAPI_KEY`
-- `OPENROUTER_API_KEY`
+| Variable Name | Description | Mandatory / Optional |
+| :--- | :--- | :--- |
+| `LITELLM_MASTER_KEY` | Custom authentication secret (e.g. `sk-mysecret123456789`) | **Mandatory** |
+| `NVIDIA_API_KEY` | Free API key from [build.nvidia.com](https://build.nvidia.com/) (1,000 free credits) | **Primary Recommended** |
+| `OPENROUTER_API_KEY` | Free key from [openrouter.ai/keys](https://openrouter.ai/keys) | Optional (for OpenRouter free models) |
+| `GEMINI_API_KEY` | Free key from [aistudio.google.com](https://aistudio.google.com/) | Optional (15 RPM / 1M TPM) |
+| `GROQ_API_KEY` | Free key from [console.groq.com](https://console.groq.com/) | Optional (300+ tok/s) |
+| `MISTRAL_API_KEY` | Free key from [console.mistral.ai](https://console.mistral.ai/) | Optional (Codestral 1B tokens/mo) |
+| `SAMBANOVA_API_KEY` | Free key from [cloud.sambanova.ai](https://cloud.sambanova.ai/) | Optional (Llama 405B & R1) |
+| `GITHUB_API_KEY` | Personal Access Token from [github.com/settings/tokens](https://github.com/settings/tokens) | Optional (o3-mini & GPT-4o) |
+| `DEEPSEEK_API_KEY` | Key from [platform.deepseek.com](https://platform.deepseek.com/) | Optional (5M free tokens) |
+| `ZHIPUAI_API_KEY` | Key from [open.bigmodel.cn](https://open.bigmodel.cn/) | Optional (GLM-4-Flash free) |
+
+> 💡 **Note**: You only need `LITELLM_MASTER_KEY` + `NVIDIA_API_KEY` to start. Any additional keys you add will automatically unlock extra providers in the pool. If a key is missing or rate limited, LiteLLM automatically bypasses it and uses the next available provider.
 
 ---
 
-## Security Best Practices
+## 💻 Local Testing with Docker
 
-1. **Zero Secret Leaks:**
-   - Upstream API keys reside **only** in the Render Environment Dashboard.
-   - Your local environment only requires `LITELLM_MASTER_KEY`.
-2. **Master Key Guard:**
-   - The master key must begin with `sk-` (e.g. `openssl rand -hex 32 | sed 's/^/sk-/'`).
-3. **Protected Endpoints:**
-   - Public access is only granted to `/health/liveliness` and `/health/readiness`. All inference routes require Bearer token authentication.
+To test locally before deploying:
+
+```bash
+# Run locally with Docker
+docker build -t litellm-nvidia-proxy .
+docker run -p 4000:4000 \
+  -e LITELLM_MASTER_KEY="sk-test-master-key-12345" \
+  -e NVIDIA_API_KEY="nvapi-your-key" \
+  -e OPENROUTER_API_KEY="sk-or-your-key" \
+  -e GEMINI_API_KEY="your-gemini-key" \
+  litellm-nvidia-proxy
+```
+
+Test the local instance:
+```bash
+curl http://localhost:4000/health/liveliness
+```
 
 ---
 
-## License
-MIT - Build unlimited agentic workflows with free AI models!
+## 🔒 Security Best Practices
+
+1. **Never commit actual API keys to Git**: All upstream keys are stored securely as environment variables on Render.
+2. **Master Key Guard**: Use a strong random key prefixed with `sk-` for `LITELLM_MASTER_KEY` (`openssl rand -hex 24 | sed 's/^/sk-/'`).
+3. **Protected Endpoints**: Only `/health/liveliness` and `/health/readiness` are open for Render health probes. All LLM endpoints require `Authorization: Bearer <LITELLM_MASTER_KEY>`.
+
+---
+
+## 📄 License
+MIT
