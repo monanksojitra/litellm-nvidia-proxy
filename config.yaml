@@ -17,13 +17,22 @@ model_list:
   # NVIDIA NIM (Primary: Nemotron Super 49B - Best Instruction & Code Synthesis)
   - model_name: free-coding
     litellm_params:
+      model: openai/moonshotai/kimi-k3
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      rpm: 60
+      tpm: 100000
+      request_timeout: 120
+      
+  - model_name: free-coding
+    litellm_params:
       model: openai/nvidia/llama-3.3-nemotron-super-49b-v1.5
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
       rpm: 60
       tpm: 100000
       request_timeout: 120
-
+      
   # NVIDIA NIM (Llama 3.3 70B Instruct - High Quality General Reasoning & Coding)
   - model_name: free-coding
     litellm_params:
